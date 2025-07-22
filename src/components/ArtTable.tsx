@@ -31,9 +31,9 @@ const ArtTable: React.FC = () => {
     fetchData(page);
   }, [page]);
 
- const onPageChange = (e: DataTableStateEvent) => {
-  setPage(e.page ?? 0); 
-};
+  const onPageChange = (e: DataTableStateEvent) => {
+    setPage(e.page ?? 0);
+  };
 
   const onSelectionChange = (e: { value: ArtData[] }) => {
     const updatedMap: { [key: number]: ArtData } = { ...selectedRows };
@@ -41,11 +41,11 @@ const ArtTable: React.FC = () => {
 
     const currentPageIds = data.map((d) => d.id);
     currentPageIds.forEach((id) => {
-      delete updatedMap[id]; 
+      delete updatedMap[id];
     });
 
     selected.forEach((item) => {
-      updatedMap[item.id] = item; 
+      updatedMap[item.id] = item;
     });
 
     setSelectedRows(updatedMap);
@@ -79,39 +79,42 @@ const ArtTable: React.FC = () => {
     }
 
     setSelectedRows(updatedMap);
-    setPage(0); 
+    setPage(0);
     op.current?.hide();
+  };
+
+  const titleHeaderTemplate = (options: any) => {
+    return (
+      <div className="flex items-center justify-between w-full">
+        <span>Title</span>
+        <i
+          className="pi pi-angle-down cursor-pointer ml-2"
+          onClick={(e) => op.current?.toggle(e)}
+        ></i>
+      </div>
+    );
   };
 
   return (
     <>
-      <div className="p-2">
-        <Button
-          type="button"
-          label="Select Rows"
-          icon="pi pi-sliders-h"
-          onClick={(e) => op.current?.toggle(e)}
-          className="mb-2"
-        />
-
-        <OverlayPanel ref={op}>
-          <div className="flex flex-col gap-2">
-            <input
-              type="number"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Select rows..."
-              className="border rounded px-2 py-1"
-            />
-            <button
-              onClick={handleSubmit}
-              className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700"
-            >
-              Submit
-            </button>
-          </div>
-        </OverlayPanel>
-      </div>
+      {/* OverlayPanel triggered by arrow in header */}
+      <OverlayPanel ref={op}>
+        <div className="flex flex-col gap-2">
+          <input
+            type="number"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Select rows..."
+            className="border rounded px-2 py-1"
+          />
+          <button
+            onClick={handleSubmit}
+            className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700"
+          >
+            Submit
+          </button>
+        </div>
+      </OverlayPanel>
 
       <DataTable
         value={data}
@@ -127,12 +130,12 @@ const ArtTable: React.FC = () => {
         selectionMode="multiple"
       >
         <Column selectionMode="multiple" headerStyle={{ width: '3em' }} />
-        <Column field="title" header="Title" />
-        <Column field="place_of_origin" header="Origin" />
-        <Column field="artist_display" header="Artist" />
+        <Column field="title" header={titleHeaderTemplate} />
+        <Column field="place_of_origin" header="Place Of Origin" />
+        <Column field="artist_display" header="Artist Display" />
         <Column field="inscriptions" header="Inscriptions" />
-        <Column field="date_start" header="Start Date" />
-        <Column field="date_end" header="End Date" />
+        <Column field="date_start" header="Date Start" />
+        <Column field="date_end" header="Date End" />
       </DataTable>
 
       <SelectedPanel selectedRows={Object.values(selectedRows)} />
