@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { OverlayPanel } from 'primereact/overlaypanel';
-import { Button } from 'primereact/button';
 import type { ArtData } from '../types/ArtTypes';
 import SelectedPanel from './SelectedPanel';
 import type { DataTableStateEvent } from 'primereact/datatable';
@@ -83,7 +82,7 @@ const ArtTable: React.FC = () => {
     op.current?.hide();
   };
 
-  const titleHeaderTemplate = (options: any) => {
+  const titleHeaderTemplate = () => {
     return (
       <div className="flex items-center justify-between w-full">
         <span>Title</span>
@@ -97,7 +96,7 @@ const ArtTable: React.FC = () => {
 
   return (
     <>
-      {/* OverlayPanel triggered by arrow in header */}
+      
       <OverlayPanel ref={op}>
         <div className="flex flex-col gap-2">
           <input
