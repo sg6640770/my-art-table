@@ -19,30 +19,37 @@ const ArtTable: React.FC = () => {
   const fetchData = async (pageNum: number): Promise<ArtData[]> => {
     const response = await fetch(`https://api.artic.edu/api/v1/artworks?page=${pageNum + 1}&limit=${pageSize}`);
     const result = await response.json();
+
     if (pageNum === page) {
       setData(result.data);
       setTotalRecords(result.pagination.total);
     }
+
     return result.data;
   };
 
+  
   useEffect(() => {
     fetchData(page);
   }, [page]);
+
 
   const onPageChange = (e: DataTableStateEvent) => {
     setPage(e.page ?? 0);
   };
 
+  
   const onSelectionChange = (e: { value: ArtData[] }) => {
     const updatedMap: { [key: number]: ArtData } = { ...selectedRows };
     const selected = e.value;
-
     const currentPageIds = data.map((d) => d.id);
+
+    
     currentPageIds.forEach((id) => {
       delete updatedMap[id];
     });
 
+  
     selected.forEach((item) => {
       updatedMap[item.id] = item;
     });
@@ -50,38 +57,57 @@ const ArtTable: React.FC = () => {
     setSelectedRows(updatedMap);
   };
 
-  const handleSubmit = async () => {
-    const count = parseInt(inputValue);
-    if (isNaN(count) || count <= 0) return;
+  
+const handleSubmit = async () => {
+  const count = parseInt(inputValue);
+  if (isNaN(count) || count <= 0) return;
 
-    let updatedMap: { [key: number]: ArtData } = {};
-    let selectedCount = 0;
-    let currentPage = 0;
-    let stop = false;
+  let updatedMap: { [key: number]: ArtData } = {};
+  let selectedCount = 0;
+  let stop = false;
 
-    while (!stop) {
-      const pageData = await fetchData(currentPage);
 
-      for (const item of pageData) {
-        if (!updatedMap[item.id]) {
-          updatedMap[item.id] = item;
-          selectedCount++;
-          if (selectedCount === count) {
-            stop = true;
-            break;
-          }
-        }
+  for (const item of data) {
+    if (!updatedMap[item.id]) {
+      updatedMap[item.id] = item;
+      selectedCount++;
+      if (selectedCount === count) {
+        stop = true;
+        break;
       }
+    }
+  }
 
+  let currentPage = 0;
+  while (!stop) {
+    if (currentPage === page) {
       currentPage++;
-      if (selectedCount >= count) break;
+      continue;
     }
 
-    setSelectedRows(updatedMap);
-    setPage(0);
-    op.current?.hide();
-  };
+    const pageData = await fetchData(currentPage);
 
+    for (const item of pageData) {
+      if (!updatedMap[item.id]) {
+        updatedMap[item.id] = item;
+        selectedCount++;
+        if (selectedCount === count) {
+          stop = true;
+          break;
+        }
+      }
+    }
+
+    if (pageData.length === 0 || selectedCount >= count) break;
+    currentPage++;
+  }
+
+  setSelectedRows(updatedMap);
+  op.current?.hide(); 
+};
+
+
+  
   const titleHeaderTemplate = () => {
     return (
       <div className="flex items-center justify-between w-full">
@@ -89,6 +115,7 @@ const ArtTable: React.FC = () => {
         <i
           className="pi pi-angle-down cursor-pointer ml-2"
           onClick={(e) => op.current?.toggle(e)}
+          title="Bulk Select"
         ></i>
       </div>
     );
@@ -98,12 +125,12 @@ const ArtTable: React.FC = () => {
     <>
       
       <OverlayPanel ref={op}>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-40">
           <input
             type="number"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Select rows..."
+            placeholder="Enter row count"
             className="border rounded px-2 py-1"
           />
           <button
@@ -115,6 +142,7 @@ const ArtTable: React.FC = () => {
         </div>
       </OverlayPanel>
 
+    
       <DataTable
         value={data}
         paginator
@@ -137,6 +165,7 @@ const ArtTable: React.FC = () => {
         <Column field="date_end" header="Date End" />
       </DataTable>
 
+      
       <SelectedPanel selectedRows={Object.values(selectedRows)} />
     </>
   );
